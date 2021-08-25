@@ -1,6 +1,6 @@
 {
   "name": "nest-query-parser",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A query string parser to be used in applications developed with NestJS.",
   "main": "index.js",
   "scripts": {
@@ -11,8 +11,8 @@
     "url": "git+https://github.com/lucasrochagit/nest-query-parser.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Lucas Cosmo Rocha",
+  "license": "Apache License 2.0",
   "bugs": {
     "url": "https://github.com/lucasrochagit/nest-query-parser/issues"
   },
@@ -22,5 +22,8 @@
   },
   "devDependencies": {
     "typescript": "^4.3.5"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^8.0.6"
   }
 }

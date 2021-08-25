@@ -2,13 +2,9 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { isInt, isNumberString } from '../utils/string.validator';
 import { MongoQueryModel, QueryObjectModel } from '../model/query.model';
 
-type Options = {
-    limit?: number;
-}
-
-export const MongoQuery = createParamDecorator(
- (options?: Options) =>  (data: unknown, ctx: ExecutionContext): any => {
-    const def_limit = options?.limit ?? 100;
+export const MongoQuery: () => ParameterDecorator = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): MongoQueryModel => {
+    const def_limit = 100;
     const def_skip = 0;
     const def_page = 1;
 
@@ -25,7 +21,7 @@ export const MongoQuery = createParamDecorator(
     result.filter = _getFilter(query, {});
 
     return result;
-  },
+  }
 );
 
 function _getIntKey(query: any, key: string, def: number): number {
@@ -51,7 +47,7 @@ function _getSelect(query: any, def: QueryObjectModel): QueryObjectModel {
       }
       return obj;
     },
-    {},
+    {}
   );
 }
 
@@ -66,7 +62,7 @@ function _getSort(query: any, def: QueryObjectModel): QueryObjectModel {
       }
       return obj;
     },
-    {},
+    {}
   );
 }
 
