@@ -15,6 +15,7 @@
       "skipLibCheck": true,
       "moduleResolution": "node"
     },
+    "types": "index.d.ts",
     "include": [
       "lib/**/*"
     ],
