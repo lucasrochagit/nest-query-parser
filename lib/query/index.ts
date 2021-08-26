@@ -1,1 +1,1 @@
-export { MongoQuery } from './mongo.query';
+export { MongoQuery, MongoQueryParser } from './mongo.query';
