@@ -1,1 +1,1 @@
-export * from './query.model';
+export { MongoQueryModel } from './query.model';

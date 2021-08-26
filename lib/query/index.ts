@@ -1,1 +1,1 @@
-export * from './mongo.query';
+export { MongoQuery } from './mongo.query';
