@@ -1,22 +1,17 @@
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { MongoQueryModel, QueryObjectModel } from '../model/query.model';
+import { cleanString, splitString, testString } from '../utils/string.util';
 import {
-  createParamDecorator,
-  ExecutionContext,
-  UseFilters,
-} from '@nestjs/common';
-import {
-  isISODate,
   isInt,
   isISODateTime,
   isNumberString,
 } from '../utils/string.validator';
-import { MongoQueryModel, QueryObjectModel } from '../model/query.model';
-import { cleanString, splitString, testString } from '../utils/string.util';
 
 export const MongoQueryParser = (): MethodDecorator => {
   return (_target, _key, descriptor: TypedPropertyDescriptor<any>) => {
     const original = descriptor.value;
     descriptor.value = async function (props: any) {
-      const query: MongoQueryModel = _parse(props);
+      const query: MongoQueryModel = parse(props);
       const result = await original.apply(this, [query]);
       return result;
     };
@@ -27,41 +22,41 @@ export const MongoQueryParser = (): MethodDecorator => {
 export const MongoQuery: () => ParameterDecorator = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): MongoQueryModel => {
     const query = ctx.getArgByIndex(0).query;
-    return _parse(query);
+    return parse(query);
   }
 );
 
-function _parse(query: any): MongoQueryModel {
+function parse(query: any): MongoQueryModel {
   const def_limit = 100;
   const def_skip = 0;
   const def_page = 1;
 
   const result: MongoQueryModel = new MongoQueryModel();
 
-  result.limit = _getIntKey(query, 'limit', def_limit);
+  result.limit = getIntKey(query, 'limit', def_limit);
   result.skip = query.page
-    ? _getSkipFromPage(query, def_page, result.limit)
-    : _getIntKey(query, 'skip', def_skip);
-  result.select = _getSelect(query, {});
-  result.sort = _getSort(query, {});
-  result.filter = _getFilter(query, {});
+    ? getSkipFromPage(query, def_page, result.limit)
+    : getIntKey(query, 'skip', def_skip);
+  result.select = getSelect(query, {});
+  result.sort = getSort(query, {});
+  result.filter = getFilter(query, {});
 
   return result;
 }
 
-function _getIntKey(query: any, key: string, def: number): number {
+function getIntKey(query: any, key: string, def: number): number {
   if (!query[key] || !isInt(query[key])) {
     return def;
   }
   return +query[key];
 }
 
-function _getSkipFromPage(query: any, def: number, limit: number): number {
-  const page = _getIntKey(query, 'page', def);
+function getSkipFromPage(query: any, def: number, limit: number): number {
+  const page = getIntKey(query, 'page', def);
   return page > 1 ? (page - 1) * limit : 0;
 }
 
-function _getSelect(query: any, def: QueryObjectModel): QueryObjectModel {
+function getSelect(query: any, def: QueryObjectModel): QueryObjectModel {
   if (!query.select) return def;
   return splitString(query.select, ',').reduce(
     (obj: { [x: string]: number }, key: string) => {
@@ -73,7 +68,7 @@ function _getSelect(query: any, def: QueryObjectModel): QueryObjectModel {
   );
 }
 
-function _getSort(query: any, def: QueryObjectModel): QueryObjectModel {
+function getSort(query: any, def: QueryObjectModel): QueryObjectModel {
   if (!query.sort) return def;
   return splitString(query.sort, ',').reduce(
     (obj: { [x: string]: number }, key: string) => {
@@ -85,7 +80,7 @@ function _getSort(query: any, def: QueryObjectModel): QueryObjectModel {
   );
 }
 
-function _getFilter(query: any, def: QueryObjectModel): QueryObjectModel {
+function getFilter(query: any, def: QueryObjectModel): QueryObjectModel {
   delete query.limit;
   delete query.skip;
   delete query.page;
@@ -95,44 +90,61 @@ function _getFilter(query: any, def: QueryObjectModel): QueryObjectModel {
   return Object.keys(query).reduce((obj: any, key: string) => {
     const queryValue = query[key];
     if (queryValue instanceof Array) {
-      const value = _getFilterArrayValue(key, queryValue);
-      if (value.length) {
-        obj.$and = [...(obj.$and || []), ...value];
+      const allSimpleFilters: string[] = queryValue.filter((item: string) =>
+        isSimpleFilter(item)
+      );
+
+      const filterSimpleValues = getArrayValue(key, allSimpleFilters);
+      if (filterSimpleValues.length) {
+        obj.$and = [...(obj.$and || []), ...filterSimpleValues];
+      }
+
+      const allORFilters: string[] = queryValue
+        .filter((item: string) => isORFilter(item))
+        .map((item) => item.split(','))
+        .reduce((arr, item) => {
+          arr = [...arr, ...item];
+          return arr;
+        }, []);
+
+      const filterORValues = getArrayValue(key, [...allORFilters]);
+
+      if (filterORValues.length) {
+        obj.$or = [...(obj.$or || []), ...filterORValues];
       }
       return obj;
     } else if (isORFilter(queryValue)) {
-      const value = _getFilterArrayValue(key, queryValue.split(','));
+      const value = getArrayValue(key, queryValue.split(','));
       if (value.length) {
         obj.$or = [...(obj.$or || []), ...value];
       }
       return obj;
     }
 
-    const value = _getFilterValue(queryValue);
+    const value = getSimpleFilterValue(queryValue);
     if (value) obj[key] = value;
     return obj;
   }, {});
 }
 
-function _getFilterArrayValue(key: string, filter: string[]): any[] {
-  const isAllComparisonFilters: boolean = filter.every((item) =>
-    _isComparisonFilter(item)
-  );
-  if (!isAllComparisonFilters) return [];
-  return filter.map((item) => ({ [key]: _getFilterValue(item) }));
+function getArrayValue(key: string, filter: string[]): object[] {
+  if (!filter || !filter.length) return [];
+  return filter.map((item) => ({ [key]: getSimpleFilterValue(item) }));
 }
 
-function _getFilterValue(filter: string): string | number | any {
+function getSimpleFilterValue(
+  filter: string
+): string | number | Date | object | null {
   if (!filter) return null;
 
-  if (_isComparisonFilter(filter)) {
+  if (isComparisonFilter(filter)) {
     const first_dot_index: number = filter.indexOf(':');
     const operator: string = filter.substring(0, first_dot_index);
     const value: string = filter.substring(first_dot_index + 1);
     if (!value) {
       return null;
     }
-    return { [`$${operator}`]: _getFilterValue(value) };
+    return { [`$${operator}`]: getSimpleFilterValue(value) };
   }
 
   if (isISODateTime(filter)) {
@@ -161,7 +173,7 @@ function _getFilterValue(filter: string): string | number | any {
   };
 }
 
-function _isComparisonFilter(filter: string) {
+function isComparisonFilter(filter: string): boolean {
   return (
     filter.startsWith('eq:') ||
     filter.startsWith('gt:') ||
@@ -174,7 +186,11 @@ function _isComparisonFilter(filter: string) {
   );
 }
 
+function isSimpleFilter(value: string): boolean {
+  return testString(value, /^([\w\s@.\-:])*(?<! )$/);
+}
+
 function isORFilter(filter: string): boolean {
   if (filter.indexOf(',') === -1) return false;
-  return testString(filter, /^([\w\s@.-:],?)*(?<!,)$/);
+  return testString(filter, /^([\w\s@.\-:],?)*(?<!,)$/);
 }
