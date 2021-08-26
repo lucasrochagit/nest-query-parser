@@ -1,14 +1,15 @@
 {
   "name": "nest-query-parser",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A query string parser to be used in applications developed with NestJS.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json",
     "package": "npm run build && npm pack"
   },
   "files": [
-    "dist"
+    "/dist"
   ],
   "publishConfig": {
     "access": "public"
