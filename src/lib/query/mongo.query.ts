@@ -146,6 +146,22 @@ function getSimpleFilterValue(
         return { [`$${operator}`]: getSimpleFilterValue(value) };
     }
 
+    if (isElementFilter(filter)) {
+        const first_dot_index: number = filter.indexOf(':');
+        const operator: string = filter.substring(0, first_dot_index);
+        const value: string = filter.substring(first_dot_index + 1);
+        if (!value) {
+            return null;
+        }
+
+        if (operator === 'exists') {
+            return getElementExists(value);
+        }
+
+        return getElementType(value)
+
+    }
+
     if (StringValidator.isISODate(filter) || StringValidator.isISODateTime(filter)) {
         return new Date(filter);
     }
@@ -192,6 +208,10 @@ function isComparisonFilter(filter: string): boolean {
     );
 }
 
+function isElementFilter(filter: string): boolean {
+    return filter.startsWith('exists:') || filter.startsWith('type:')
+}
+
 function isSimpleFilter(value: string): boolean {
     return StringUtils.testString(value, /^([\w\s@.\-:])*(?<! )$/);
 }
@@ -199,4 +219,23 @@ function isSimpleFilter(value: string): boolean {
 function isORFilter(filter: string): boolean {
     if (filter.indexOf(',') === -1) return false;
     return StringUtils.testString(filter, /^([\w\s@.\-:],?)*(?<!,)$/);
+}
+
+function getElementExists(value: string) {
+    if (['true', 'false'].indexOf(value) === -1) {
+        return null;
+    }
+    return { $exists: value === 'true' }
+}
+
+function getElementType(value: string) {
+    const validTypes: string[] = [
+        'double', 'string', 'object', 'array', 'binData', 'objectId', 'bool', 'date', 'null', 'regex', 'javascript',
+        'int', 'timestamp', 'long', 'decimal', 'minKey', 'maxKey'
+    ]
+
+    if (validTypes.indexOf(value) === -1) {
+        return null;
+    }
+    return { $type: value }
 }

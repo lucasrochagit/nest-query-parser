@@ -7,19 +7,42 @@
 [![Contributors][contributors-image]][contributors-url]
 [![NPM Downloads][npm-downloads-image]][npm-downloads-url]
 
+## Summary
 
-# Prerequisites
+* [Prerequisites](#prerequisites)
+* [Installing](#installing)
+* [Usage](#usage)
+* [Examples](#examples)
+* [Explain the Resources](#explain-the-resources)
+  * [Queries with @MongoQuery() | @MongoQueryParser()](#queries-with-mongoquery--mongoqueryparser)
+    * [Pagination](#pagination)
+    * [Ordering](#ordering)
+    * [Select](#select)
+    * [Filters](#filters)
+      * [Simple Filters](#simple-filters)
+      * [Partial Filters](#partial-filters)
+      * [Comparison Filters](#comparison-filters)
+      * [Element Filters](#element-filters)
+      * [AND | OR Filters](#and--or-filters)
+* [Rules](#rules)
+* [Observations](#observations)
+* [Practical Examples](#practical-examples)
+* [Upcoming Features](#upcoming-features)
+* [License](#license)
+* [Authors](#authors)
+  
+##  Prerequisites
 
 As the name of the library suggests, this library was built to work together with the NestJS framework. However, as
 future work, another library will be implemented that can be used as middleware of APIs that use Express or HapiJS.
 
-# Installing
+## Installing
 
 Use the follow command:
 
 `npm i --save nest-query-parser`
 
-# Usage
+## Usage
 
 There are two ways to use the parsers available in this library: as a ParamDecorator or as a MethodDecorator.
 
@@ -62,11 +85,11 @@ export class ResourceService {
 
 ```
 
-# Examples
+## Examples
 
-#### Request: http://localhost:3000/resources
+##### Request: http://localhost:3000/resources
 
-#### Query:
+##### Query:
 
 ```json
 {
@@ -78,9 +101,9 @@ export class ResourceService {
 }
 ```
 
-#### Request: http://localhost:3000/resources?limit=10&page=2&select=_id,param_one,param_two&sort=-created_at&param_one=value
+##### Request: http://localhost:3000/resources?limit=10&page=2&select=_id,name,age&sort=-created_at&age=gt:30
 
-#### Query:
+##### Query:
 
 ```json
 {
@@ -129,9 +152,9 @@ the `limit` value is `100` and `skip` value is `0`.
 
 Example:
 
-#### Request: http://localhost:3000/resources?limit=10&page=3
+##### Request: http://localhost:3000/resources?limit=10&page=3
 
-#### Query:
+##### Query:
 
 ```json
 {
@@ -140,9 +163,9 @@ Example:
 }
 ```
 
-#### Request: http://localhost:3000/resources?limit=10&skip=20
+##### Request: http://localhost:3000/resources?limit=10&skip=20
 
-#### Query:
+##### Query:
 
 ```json
 {
@@ -157,9 +180,9 @@ To work with ordering, you need to specify one or more sorting parameters, and w
 ascending or descending. For ascending ordering, just put the name of the ordering parameter. For descending ordering,
 you need to put a "-" symbol before the name of the ordering parameter. Example:
 
-#### Request: http://localhost:3000/resources?sort=created_at
+##### Request: http://localhost:3000/resources?sort=created_at
 
-#### Query:
+##### Query:
 
 ```json
 {
@@ -169,9 +192,9 @@ you need to put a "-" symbol before the name of the ordering parameter. Example:
 }
 ```
 
-#### Request: http://localhost:3000/resources?sort=-created_at
+##### Request: http://localhost:3000/resources?sort=-created_at
 
-#### Query:
+##### Query:
 
 ```json
 {
@@ -181,9 +204,9 @@ you need to put a "-" symbol before the name of the ordering parameter. Example:
 }
 ```
 
-#### Request: http://localhost:3000/resources?sort=-age,name
+##### Request: http://localhost:3000/resources?sort=-age,name
 
-#### Query:
+##### Query:
 
 ```json
 {
@@ -207,9 +230,9 @@ just place a "-" symbol before the parameter.
 
 Example:
 
-#### Request: http://localhost:3000/resources?select=_id,name,age
+##### Request: http://localhost:3000/resources?select=_id,name,age
 
-#### Query:
+##### Query:
 
 ```json
 {
@@ -221,9 +244,9 @@ Example:
 }
 ```
 
-#### Request: http://localhost:3000/resources?select=-_id,-created_at,-updated_at
+##### Request: http://localhost:3000/resources?select=-_id,-created_at,-updated_at
 
-#### Query:
+##### Query:
 
 ```json
 {
@@ -260,9 +283,9 @@ are some validations that are done on these values.
 
 Example:
 
-#### Request: http://localhost:3000/resources?name=John%20Doe&age=31&birth_date=1990-01-01
+##### Request: http://localhost:3000/resources?name=John%20Doe&age=31&birth_date=1990-01-01
 
-#### Query:
+##### Query:
 
 ```
 {
@@ -289,9 +312,9 @@ where:
 
 Example:
 
-#### Request: http://localhost:3000/resources?name=*Lu&email=gmail.com*&job=*Developer*
+##### Request: http://localhost:3000/resources?name=*Lu&email=gmail.com*&job=*Developer*
 
-#### Query:
+##### Query:
 
 ```JSON
 {
@@ -333,9 +356,9 @@ available comparison operators are:
 
 To use these operators, just pass the comparator tag without the "$" symbol. Example:
 
-#### Request: http://localhost:3000/resources?age=gt:30
+##### Request: http://localhost:3000/resources?age=gt:30
 
-#### Query:
+##### Query:
 
 ```JSON
 {
@@ -351,15 +374,79 @@ To use these operators, just pass the comparator tag without the "$" symbol. Exa
 I won't put an example with all operators here, but you can test arithmetic comparison operators on parameters with
 values of type string or number, or test the operators of `$in` and `$nin` on parameters of type array.
 
+#### Element Filters
+
+Element filters are filters used to deal with parameters that make up the entity's schema. There are two types of
+element filter possibilities:
+
+* $exists: returns elements that have or do not have a specific field
+
+* $type: returns elements whose field has a specific type.
+
+Example:
+
+##### Request: http://localhost:3000/resources?created_at=exists:true&updated_at=exists:false&jobs=type:array
+
+##### Query:
+
+```JSON
+{
+  "filter": {
+    "created_at": {
+      "$exists": true
+    },
+    "updated_at": {
+      "$exists": false
+    },
+    "jobs": {
+      "$type": "array"
+    }
+  }
+}
+
+```
+
+The $exists filter only works with `true` or `false` values. If a different value is entered, the filter will be
+ignored.
+
+The same goes for the $type filter, which only works with valid type values defined in
+the [mongodb documentation](https://docs.mongodb.com/manual/reference/operator/query/type/#mongodb-query-op.-type) (
+except deprecated ones):
+
+```JSON
+ {
+  "validTypes": [
+    "double",
+    "string",
+    "object",
+    "array",
+    "binData",
+    "objectId",
+    "bool",
+    "date",
+    "null",
+    "regex",
+    "javascript",
+    "int",
+    "timestamp",
+    "long",
+    "decimal",
+    "minKey",
+    "maxKey"
+  ]
+}
+
+```
+
 #### AND | OR filters
 
 Finally, it is possible to use filters with AND | OR operator. The usage logic follows the arithmetic rule.
 
 To use the AND operator, you must pass the same value twice in a query. Example:
 
-#### Request: http://localhost:3000/resources?age=gt:30&age=50
+##### Request: http://localhost:3000/resources?age=gt:30&age=50
 
-#### Query:
+##### Query:
 
 ```JSON
 {
@@ -381,9 +468,9 @@ To use the AND operator, you must pass the same value twice in a query. Example:
 
 To use the OR operator, you must enter the values separated by a comma. Example:
 
-#### Request: http://localhost:3000/resources?age=gt:30,50
+##### Request: http://localhost:3000/resources?age=gt:30,50
 
-#### Query:
+##### Query:
 
 ```JSON
 {
@@ -418,15 +505,14 @@ This library is generic. This means that it handles the query based on the query
 possible to control events such as filter parameters with types incompatible with the types defined in the base. Use
 proper queries for your API, to prevent implementation errors from being thrown into your app.
 
-## Practical examples
+## Practical Examples
 
 Examples of real APIs that use the library to handle queries will be available as soon as possible, in
 my [github repository](https://www.github.com/lucasrochagit).
 
-## Upcoming features:
+## Upcoming Features:
 
 * Add a query handling option for Typeorm.
-
 
 ## License
 
@@ -441,18 +527,33 @@ Distributed under the Apache License 2.0. See `LICENSE` for more information.
   [![Github](https://img.shields.io/static/v1?label=github&message=@lucasrochagit&color=black)](https://github.com/lucasrochagit/)
 
 [//]: # (These are reference links used in the body of this note.)
+
 [node.js]: <https://nodejs.org>
+
 [npm.js]: <https://www.npmjs.com/>
+
 [license-image]: https://img.shields.io/badge/license-Apache%202.0-blue.svg
+
 [license-url]: https://github.com/lucasrochagit/nest-query-parser/blob/main/LICENSE
+
 [npm-image]: https://img.shields.io/npm/v/nest-query-parser.svg?color=red&logo=npm
+
 [npm-url]: https://npmjs.org/package/nest-query-parser
+
 [npm-downloads-image]: https://img.shields.io/npm/dm/nest-query-parser.svg
+
 [npm-downloads-url]: https://npmjs.org/package/nest-query-parser
+
 [dependencies-image]: https://shields.io/badge/dependencies-1-green
+
 [dependencies-url]: https://shields.io/badge/dependencies-0-green
+
 [releases-image]: https://img.shields.io/github/release-date/lucasrochagit/nest-query-parser.svg
+
 [releases-url]: https://github.com/lucasrochagit/nest-query-parser/releases
+
 [contributors-image]: https://img.shields.io/github/contributors/lucasrochagit/nest-query-parser.svg?color=green
+
 [contributors-url]: https://github.com/lucasrochagit/nest-query-parser/graphs/contributors
+
 [issues-image]: https://img.shields.io/github/issues/lucasrochagit/nest-query-parser.svg
