@@ -66,7 +66,7 @@ export class ResourceService {
 
 #### Request: http://localhost:3000/resources
 
-#### Response:
+#### Query:
 
 ```json
 {
@@ -80,7 +80,7 @@ export class ResourceService {
 
 #### Request: http://localhost:3000/resources?limit=10&page=2&select=_id,param_one,param_two&sort=-created_at&param_one=value
 
-#### Response:
+#### Query:
 
 ```json
 {
@@ -131,7 +131,7 @@ Example:
 
 #### Request: http://localhost:3000/resources?limit=10&page=3
 
-#### Response:
+#### Query:
 
 ```json
 {
@@ -142,7 +142,7 @@ Example:
 
 #### Request: http://localhost:3000/resources?limit=10&skip=20
 
-#### Response:
+#### Query:
 
 ```json
 {
@@ -159,7 +159,7 @@ you need to put a "-" symbol before the name of the ordering parameter. Example:
 
 #### Request: http://localhost:3000/resources?sort=created_at
 
-#### Response:
+#### Query:
 
 ```json
 {
@@ -171,7 +171,7 @@ you need to put a "-" symbol before the name of the ordering parameter. Example:
 
 #### Request: http://localhost:3000/resources?sort=-created_at
 
-#### Response:
+#### Query:
 
 ```json
 {
@@ -183,7 +183,7 @@ you need to put a "-" symbol before the name of the ordering parameter. Example:
 
 #### Request: http://localhost:3000/resources?sort=-age,name
 
-#### Response:
+#### Query:
 
 ```json
 {
@@ -209,7 +209,7 @@ Example:
 
 #### Request: http://localhost:3000/resources?select=_id,name,age
 
-#### Response:
+#### Query:
 
 ```json
 {
@@ -223,7 +223,7 @@ Example:
 
 #### Request: http://localhost:3000/resources?select=-_id,-created_at,-updated_at
 
-#### Response:
+#### Query:
 
 ```json
 {
@@ -260,7 +260,7 @@ Example:
 
 #### Request: http://localhost:3000/resources?name=John%20Doe&age=31&birth_date=1990-01-01
 
-#### Response:
+#### Query:
 
 ```
 {
@@ -289,7 +289,7 @@ Example:
 
 #### Request: http://localhost:3000/resources?name=*Lu&email=gmail.com*&job=*Developer*
 
-#### Response:
+#### Query:
 
 ```JSON
 {
@@ -333,7 +333,7 @@ To use these operators, just pass the comparator tag without the "$" symbol. Exa
 
 #### Request: http://localhost:3000/resources?age=gt:30
 
-#### Response:
+#### Query:
 
 ```JSON
 {
@@ -357,7 +357,7 @@ To use the AND operator, you must pass the same value twice in a query. Example:
 
 #### Request: http://localhost:3000/resources?age=gt:30&age=50
 
-#### Response:
+#### Query:
 
 ```JSON
 {
@@ -381,7 +381,7 @@ To use the OR operator, you must enter the values separated by a comma. Example:
 
 #### Request: http://localhost:3000/resources?age=gt:30,50
 
-#### Response:
+#### Query:
 
 ```JSON
 {
