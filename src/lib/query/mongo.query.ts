@@ -117,8 +117,10 @@ function getFilter(query: any, def: QueryObjectModel): QueryObjectModel {
         }
 
         const value = getSimpleFilterValue(queryValue);
-        const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_]/g)
-        if (value) obj[cleanKey] = value;
+        if (value !== null) {
+            const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_]/g)
+            obj[cleanKey] = value;
+        }
         return obj;
     }, {});
 }
@@ -131,7 +133,7 @@ function getArrayValue(key: string, filter: string[]): object[] {
 
 function getSimpleFilterValue(
     filter: string
-): string | number | Date | object | null {
+): string | number | boolean | Date | object | null {
     if (!filter) return null;
 
     if (isComparisonFilter(filter)) {
@@ -150,6 +152,10 @@ function getSimpleFilterValue(
 
     if (StringValidator.isNumberString(filter)) {
         return +filter;
+    }
+
+    if (filter === 'true' || filter === 'false') {
+        return filter === 'true';
     }
 
     const value = StringUtils.cleanString(filter, /[^\w\s@.-:]/g);

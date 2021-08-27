@@ -108,7 +108,7 @@ export class ResourceService {
 
 ### Pagination
 
-The paging feature is very useful for customers who will consume your API. It is through this feature that applications
+The paging feature is very useful for clients who will consume your API. It is through this feature that applications
 can define the data limit in a query, as well as define which page to be displayed. Each time a page of an application
 is selected, it means that some resources have been displaced (data offset or skip data).
 
@@ -124,7 +124,7 @@ This means that for a limit of 10 elements per page:
 
 And so on.
 
-With this library, it is possible to use pagination with the `page` parameter, or using the `sort` manually. By default,
+With this library, it is possible to use pagination with the `page` parameter, or using the `skip` manually. By default,
 the `limit` value is `100` and `skip` value is `0`.
 
 Example:
@@ -250,11 +250,13 @@ Simple filters are equality filters. Basically it's set key=value. All filter pa
 are some validations that are done on these values.
 
 1. If the value is a string number, it is transformed into a number, either integer or float/double (up to 16 decimal
-   places).
+   places);
 
-2. If the value is in yyyy-MM-dd format or yyyy-MM-ddThh:mm:ss.sZ format, it is transformed into a Date object
+2. If the value is in yyyy-MM-dd format or yyyy-MM-ddThh:mm:ss.sZ format, it is transformed into a Date object;
 
-3. Otherwise, the value is considered as a string.
+3. If the value is 'true' or 'false', it is transformed into a boolean value, according to your value;
+
+4. Otherwise, the value is considered as a string.
 
 Example:
 
