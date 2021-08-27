@@ -114,7 +114,7 @@ is selected, it means that some resources have been displaced (data offset or sk
 
 There is a mathematical rule that relates page number to resource offset. Basically:
 
-`offset = (page - 1) * limit, where p > 0.`
+`offset = (page - 1) * limit, where page > 0.`
 
 This means that for a limit of 10 elements per page:
 
