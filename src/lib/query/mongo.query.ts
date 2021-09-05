@@ -92,7 +92,7 @@ function getPopulate(query: any, def: QueryObjectModel[]): QueryObjectModel | Qu
         result.select = getSelect({select}, {});
     }
     if (filter) {
-        result.filter = getFilter(url.parse(`?${filter}`, true).query, {});
+        result.match = getFilter(url.parse(`?${filter}`, true).query, {});
     }
 
     return result;

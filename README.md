@@ -547,7 +547,7 @@ There are three ways to add the `populate` parameter to the query string:
       "title": 1,
       "salary": 1
     },
-    "filter": {
+    "match": {
       "salary": {
         "$gt": 3000
       }
