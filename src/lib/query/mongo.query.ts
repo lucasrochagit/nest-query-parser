@@ -1,7 +1,8 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { MongoQueryModel, QueryObjectModel } from '../model/query.model';
-import { StringUtils } from '../utils/string.util'
-import { StringValidator } from '../utils/string.validator'
+import {createParamDecorator, ExecutionContext} from '@nestjs/common';
+import {MongoQueryModel, QueryObjectModel} from '../model/query.model';
+import {StringUtils} from '../utils/string.util'
+import {StringValidator} from '../utils/string.validator'
+import * as url from 'url';
 
 export const MongoQueryParser = (): MethodDecorator => {
     return (_target, _key, descriptor: TypedPropertyDescriptor<any>) => {
@@ -34,6 +35,7 @@ function parse(query: any): MongoQueryModel {
         : getIntKey(query, 'skip', def_skip);
     result.select = getSelect(query, {});
     result.sort = getSort(query, {});
+    result.populate = getPopulate(query, []);
     result.filter = getFilter(query, {});
 
     return result;
@@ -75,12 +77,34 @@ function getSort(query: any, def: QueryObjectModel): QueryObjectModel {
     );
 }
 
+function getPopulate(query: any, def: QueryObjectModel[]): QueryObjectModel | QueryObjectModel[] {
+    if (!query.populate) return def;
+
+    if (query.populate instanceof Array) {
+        return query.populate.map((populate: any) => getPopulate({populate}, def));
+    }
+
+    const [path, select, filter] = query.populate.split(";");
+
+    const result: QueryObjectModel = {path};
+
+    if (select && select !== "all") {
+        result.select = getSelect({select}, {});
+    }
+    if (filter) {
+        result.filter = getFilter(url.parse(`?${filter}`, true).query, {});
+    }
+
+    return result;
+}
+
 function getFilter(query: any, def: QueryObjectModel): QueryObjectModel {
     delete query.limit;
     delete query.skip;
     delete query.page;
     delete query.select;
     delete query.sort;
+    delete query.populate;
     if (!query) return def;
     return Object.keys(query).reduce((obj: any, key: string) => {
         const queryValue = query[key];
@@ -128,7 +152,7 @@ function getFilter(query: any, def: QueryObjectModel): QueryObjectModel {
 function getArrayValue(key: string, filter: string[]): object[] {
     if (!filter || !filter.length) return [];
     const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_]/g)
-    return filter.map((item) => ({ [cleanKey]: getSimpleFilterValue(item) }));
+    return filter.map((item) => ({[cleanKey]: getSimpleFilterValue(item)}));
 }
 
 function getSimpleFilterValue(
@@ -143,7 +167,7 @@ function getSimpleFilterValue(
         if (!value) {
             return null;
         }
-        return { [`$${operator}`]: getSimpleFilterValue(value) };
+        return {[`$${operator}`]: getSimpleFilterValue(value)};
     }
 
     if (isElementFilter(filter)) {
@@ -225,7 +249,7 @@ function getElementExists(value: string) {
     if (['true', 'false'].indexOf(value) === -1) {
         return null;
     }
-    return { $exists: value === 'true' }
+    return {$exists: value === 'true'}
 }
 
 function getElementType(value: string) {
@@ -237,5 +261,5 @@ function getElementType(value: string) {
     if (validTypes.indexOf(value) === -1) {
         return null;
     }
-    return { $type: value }
+    return {$type: value}
 }

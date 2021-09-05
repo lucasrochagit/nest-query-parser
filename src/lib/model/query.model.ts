@@ -4,6 +4,7 @@ export class MongoQueryModel {
   sort!: QueryObjectModel;
   select!: QueryObjectModel;
   filter!: QueryObjectModel;
+  populate!: QueryObjectModel | QueryObjectModel[]
 }
 
 export class QueryObjectModel {

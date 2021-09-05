@@ -14,24 +14,24 @@
 * [Usage](#usage)
 * [Examples](#examples)
 * [Explain the Resources](#explain-the-resources)
-  * [Queries with @MongoQuery() | @MongoQueryParser()](#queries-with-mongoquery--mongoqueryparser)
-    * [Pagination](#pagination)
-    * [Ordering](#ordering)
-    * [Select](#select)
-    * [Filters](#filters)
-      * [Simple Filters](#simple-filters)
-      * [Partial Filters](#partial-filters)
-      * [Comparison Filters](#comparison-filters)
-      * [Element Filters](#element-filters)
-      * [AND | OR Filters](#and--or-filters)
+    * [Queries with @MongoQuery() | @MongoQueryParser()](#queries-with-mongoquery--mongoqueryparser)
+        * [Pagination](#pagination)
+        * [Ordering](#ordering)
+        * [Select](#select)
+        * [Filters](#filters)
+            * [Simple Filters](#simple-filters)
+            * [Partial Filters](#partial-filters)
+            * [Comparison Filters](#comparison-filters)
+            * [Element Filters](#element-filters)
+            * [AND | OR Filters](#and--or-filters)
 * [Rules](#rules)
 * [Observations](#observations)
 * [Practical Examples](#practical-examples)
 * [Upcoming Features](#upcoming-features)
 * [License](#license)
 * [Authors](#authors)
-  
-##  Prerequisites
+
+## Prerequisites
 
 As the name of the library suggests, this library was built to work together with the NestJS framework. However, as
 future work, another library will be implemented that can be used as middleware of APIs that use Express or HapiJS.
@@ -50,10 +50,10 @@ If you want to use it as a ParamDecorator, just add the tag referring to the Par
 Example:
 
 ```ts
-import { Get } from '@nestjs/common';
-import { Controller } from '@nestjs/common';
-import { ResourceService } from './resource.service';
-import { MongoQuery, MongoQueryModel } from 'nest-query-parser';
+import {Get} from '@nestjs/common';
+import {Controller} from '@nestjs/common';
+import {ResourceService} from './resource.service';
+import {MongoQuery, MongoQueryModel} from 'nest-query-parser';
 
 @Controller('resources')
 export class ResourceController {
@@ -72,8 +72,8 @@ It can also be used as a MethodDecorator. Just use the tag referring to the Pars
 Example:
 
 ```ts
-import { Injectable } from '@nestjs/common';
-import { MongoQueryParser, MongoQueryModel } from 'nest-query-parser';
+import {Injectable} from '@nestjs/common';
+import {MongoQueryParser, MongoQueryModel} from 'nest-query-parser';
 
 @Injectable()
 export class ResourceService {
@@ -97,6 +97,7 @@ export class ResourceService {
   "skip": 0,
   "select": {},
   "sort": {},
+  "populate": [],
   "filter": {}
 }
 ```
@@ -117,6 +118,7 @@ export class ResourceService {
   "sort": {
     "created_at": -1
   },
+  "populate": [],
   "filter": {
     "age": {
       "$gt": 30
@@ -490,12 +492,106 @@ To use the OR operator, you must enter the values separated by a comma. Example:
 
 ```
 
+### Populate (NEW)
+
+If any collection uses references to other objects, in some operations it is interesting to return this information
+populated in the object in a single request. For this, the library supports the `populate` feature.
+
+There are three ways to add the `populate` parameter to the query string:
+
+* Specifying only the field to be populated:
+
+##### Request: http://localhost:3000/resources?populate=jobs
+
+##### Query:
+
+```json
+{
+  "populate": {
+    "path": "jobs"
+  }
+}
+```
+
+* Specifying the field to be populated and which fields should be returned:
+
+##### Request: http://localhost:3000/resources?populate=jobs;title,salary
+
+##### Query:
+
+```json
+{
+  "populate": {
+    "path": "jobs",
+    "select": {
+      "title": 1,
+      "salary": 1
+    }
+  }
+}
+``` 
+
+* Specifying the field to be populated, which fields should be returned and a resource filter (useful parameter when the
+  populated field is a list):
+
+##### Request: http://localhost:3000/resources?populate=jobs;title,salary;salary=gt:3000
+
+##### Query:
+
+```json
+{
+  "populate": {
+    "path": "job",
+    "select": {
+      "title": 1,
+      "salary": 1
+    },
+    "filter": {
+      "salary": {
+        "$gt": 3000
+      }
+    }
+  }
+}
+``` 
+
+* Specifying more than one field to be populated:
+
+##### Request: http://localhost:3000/resources?populate=jobs&populate=currentJob
+
+##### Query:
+
+```json
+{
+  "populate": [
+    {
+      "path": "jobs"
+    },
+    {
+      "path": "currentJob"
+    }
+  ]
+}
+``` 
+
+There are some rules to consider in populate. The populate must be specified as follows:
+`populate=field;select;filter`. Soon:
+
+1. If you specify only the field to be populated, all field parameters will be returned, and if it is an array, all
+   array elements will be returned;
+2. If you want to specify which parameters are to be returned from the populated field, you need to specify which fields
+   are to be returned;
+3. If you want to filter the populated parameters, you need to specify the parameters that should be returned. If you
+   want to return all object parameters, the `select` parameter must be informed as `all`.
+   Example: `populate=jobs;all;salary=gt:3000`
+
 ## Rules
 
 * For pagination, you should use `limit`, `skip` and `page` only;
 * For ordination, you should use `sort` only;
 * For select, you should use `select` only;
-* Anything other than `limit`, `skip`, `page`, `sort` and `select` will be considered a filter;
+* For populate, you should use `populate`only;
+* Anything other than `limit`, `skip`, `page`, `sort`, `select` and `populate` will be considered a filter;
 * Parameters never contain characters that don't fit the regex `/[^A-z0-9_]/g`;
 * Filter values never contain characters that don't fit the regex `/[^\w\s@.-:]/g`;
 
@@ -507,8 +603,8 @@ proper queries for your API, to prevent implementation errors from being thrown 
 
 ## Practical Examples
 
-Examples of real APIs that use the library to handle queries will be available as soon as possible, in
-my [github repository](https://www.github.com/lucasrochagit).
+Check out how the configuration of the library in an API works in practice
+in [this project](https://www.github.com/lucasrochagit/nest-query-parser-apis).
 
 ## Upcoming Features:
 
