@@ -24,7 +24,7 @@
             * [Comparison Filters](#comparison-filters)
             * [Element Filters](#element-filters)
             * [AND | OR Filters](#and--or-filters)
-        * [Populate](#populate-new)
+        * [Populate](#populate)
 * [Rules](#rules)
 * [Observations](#observations)
 * [Practical Examples](#practical-examples)
@@ -300,6 +300,38 @@ Example:
 }
 ```
 
+#### MultiLevel Filters
+
+You can specify multilevel filters. This means that, if you have an object that has a field that is another object, you
+can perform a search with filters through the parameters of the internal object. Example:
+
+##### Object
+
+```json
+{
+  "_id": "613532a350857c1c8d1d10d9",
+  "name": "Filippo Nyles",
+  "age": 28,
+  "current_job": {
+    "title": "Budget/Accounting Analyst III",
+    "salary": 4776.8
+  }
+}
+```
+
+##### Request: http://localhost:3000/resources?current_job.title=Budget/Accounting%20Analyst%20III
+
+##### Query:
+
+```json
+{
+  "filter": {
+    "current_job.title": "Budget/Accounting Analyst III"
+  }
+}
+
+```
+
 #### Partial Filters
 
 Partial filters are a way to search a string type value for a part of the value. There are three ways to use partial
@@ -493,7 +525,7 @@ To use the OR operator, you must enter the values separated by a comma. Example:
 
 ```
 
-### Populate (NEW)
+### Populate
 
 If any collection uses references to other objects, in some operations it is interesting to return this information
 populated in the object in a single request. For this, the library supports the `populate` feature.
@@ -593,7 +625,7 @@ There are some rules to consider in populate. The populate must be specified as 
 * For select, you should use `select` only;
 * For populate, you should use `populate`only;
 * Anything other than `limit`, `skip`, `page`, `sort`, `select` and `populate` will be considered a filter;
-* Parameters never contain characters that don't fit the regex `/[^A-z0-9_]/g`;
+* Parameters never contain characters that don't fit the regex `/[^A-z0-9_.]/g`;
 * Filter values never contain characters that don't fit the regex `/[^\w\s@.-:]/g`;
 
 ## Observations

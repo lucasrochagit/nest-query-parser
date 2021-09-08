@@ -57,7 +57,7 @@ function getSelect(query: any, def: QueryObjectModel): QueryObjectModel {
   if (!query.select) return def;
   return StringUtils.splitString(query.select, ',').reduce(
     (obj: { [x: string]: number }, key: string) => {
-      const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_]/g);
+      const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_.]/g);
       obj[cleanKey] = key.startsWith('-') ? 0 : 1;
       return obj;
     },
@@ -69,7 +69,7 @@ function getSort(query: any, def: QueryObjectModel): QueryObjectModel {
   if (!query.sort) return def;
   return StringUtils.splitString(query.sort, ',').reduce(
     (obj: { [x: string]: number }, key: string) => {
-      const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_]/g);
+      const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_.]/g);
       obj[cleanKey] = key.startsWith('-') ? -1 : 1;
       return obj;
     },
@@ -147,7 +147,7 @@ function getFilter(query: any, def: QueryObjectModel): QueryObjectModel {
 
     const value = getSimpleFilterValue(queryValue);
     if (value !== null) {
-      const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_]/g);
+      const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_.]/g);
       obj[cleanKey] = value;
     }
     return obj;
@@ -156,7 +156,7 @@ function getFilter(query: any, def: QueryObjectModel): QueryObjectModel {
 
 function getArrayValue(key: string, filter: string[]): object[] {
   if (!filter || !filter.length) return [];
-  const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_]/g);
+  const cleanKey: string = StringUtils.cleanString(key, /[^A-z0-9_.]/g);
   return filter.map((item) => ({ [cleanKey]: getSimpleFilterValue(item) }));
 }
 
