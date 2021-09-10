@@ -7,9 +7,11 @@ import * as url from 'url';
 export const MongoQueryParser = (): MethodDecorator => {
   return (_target, _key, descriptor: TypedPropertyDescriptor<any>) => {
     const original = descriptor.value;
-    descriptor.value = async function (props: any) {
-      const query: MongoQueryModel = parse(props);
-      return await original.apply(this, [query]);
+    descriptor.value = async function (...props: any) {
+      const queryProps = props[0]
+      const anotherProps = props.slice(1);
+      const query: MongoQueryModel = parse(queryProps);
+      return await original.apply(this, [query, ...anotherProps]);
     };
     return descriptor;
   };
