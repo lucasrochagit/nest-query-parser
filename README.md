@@ -9,28 +9,28 @@
 
 ## Summary
 
-* [Prerequisites](#prerequisites)
-* [Installing](#installing)
-* [Usage](#usage)
-* [Examples](#examples)
-* [Explain the Resources](#explain-the-resources)
-    * [Queries with @MongoQuery() | @MongoQueryParser()](#queries-with-mongoquery--mongoqueryparser)
-        * [Pagination](#pagination)
-        * [Ordering](#ordering)
-        * [Select](#select)
-        * [Filters](#filters)
-            * [Simple Filters](#simple-filters)
-            * [Partial Filters](#partial-filters)
-            * [Comparison Filters](#comparison-filters)
-            * [Element Filters](#element-filters)
-            * [AND | OR Filters](#and--or-filters)
-        * [Populate](#populate)
-* [Rules](#rules)
-* [Observations](#observations)
-* [Practical Examples](#practical-examples)
-* [Upcoming Features](#upcoming-features)
-* [License](#license)
-* [Authors](#authors)
+- [Prerequisites](#prerequisites)
+- [Installing](#installing)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Explain the Resources](#explain-the-resources)
+  - [Queries with @MongoQuery() | @MongoQueryParser()](#queries-with-mongoquery--mongoqueryparser)
+    - [Pagination](#pagination)
+    - [Ordering](#ordering)
+    - [Select](#select)
+    - [Filters](#filters)
+      - [Simple Filters](#simple-filters)
+      - [Partial Filters](#partial-filters)
+      - [Comparison Filters](#comparison-filters)
+      - [Element Filters](#element-filters)
+      - [AND | OR Filters](#and--or-filters)
+    - [Populate](#populate)
+- [Rules](#rules)
+- [Observations](#observations)
+- [Practical Examples](#practical-examples)
+- [Upcoming Features](#upcoming-features)
+- [License](#license)
+- [Authors](#authors)
 
 ## Prerequisites
 
@@ -51,40 +51,39 @@ If you want to use it as a ParamDecorator, just add the tag referring to the Par
 Example:
 
 ```ts
-import {Get} from '@nestjs/common';
-import {Controller} from '@nestjs/common';
-import {ResourceService} from './resource.service';
-import {MongoQuery, MongoQueryModel} from 'nest-query-parser';
+import { Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { ResourceService } from './resource.service';
+import { MongoQuery, MongoQueryModel } from 'nest-query-parser';
 
 @Controller('resources')
 export class ResourceController {
-    constructor(private readonly _service: ResourceService) {
-    }
+  constructor(private readonly _service: ResourceService) {}
 
-    @Get()
-    public find(@MongoQuery() query: MongoQueryModel) {
-        return this._service.find(query);
-    }
+  @Get()
+  public find(@MongoQuery() query: MongoQueryModel) {
+    return this._service.find(query);
+  }
 }
-
 ```
 
 It can also be used as a MethodDecorator. Just use the tag referring to the Parser to be used as the method decorator.
 Example:
 
 ```ts
-import {Injectable} from '@nestjs/common';
-import {MongoQueryParser, MongoQueryModel} from 'nest-query-parser';
+import { Injectable } from '@nestjs/common';
+import { MongoQueryParser, MongoQueryModel } from 'nest-query-parser';
 
 @Injectable()
 export class ResourceService {
-    @MongoQueryParser()
-    public find(query: MongoQueryModel) {
-        return [];
-    }
+  @MongoQueryParser()
+  public find(query: MongoQueryModel) {
+    return [];
+  }
 }
-
 ```
+
+NOTE: When using the library as a MethodDecorator, you can receive other arguments in the method in question, but the query has to be passed as the first argument of the function, so that the treatment is done properly.
 
 ## Examples
 
@@ -103,7 +102,7 @@ export class ResourceService {
 }
 ```
 
-##### Request: http://localhost:3000/resources?limit=10&page=2&select=_id,name,age&sort=-created_at&age=gt:30
+##### Request: http://localhost:3000/resources?limit=10&page=2&select=\_id,name,age&sort=-created_at&age=gt:30
 
 ##### Query:
 
@@ -144,9 +143,9 @@ There is a mathematical rule that relates page number to resource offset. Basica
 
 This means that for a limit of 10 elements per page:
 
-* To access page 1, the offset will be equal to = (1 - 1) * 10, so offset = 0
-* To access page 2, the offset will be equal to = (2 - 1) * 10, so offset = 10
-* To access page 3, the offset will be equal to = (3 - 1) * 10, so offset = 20
+- To access page 1, the offset will be equal to = (1 - 1) \* 10, so offset = 0
+- To access page 2, the offset will be equal to = (2 - 1) \* 10, so offset = 10
+- To access page 3, the offset will be equal to = (3 - 1) \* 10, so offset = 20
 
 And so on.
 
@@ -233,7 +232,7 @@ just place a "-" symbol before the parameter.
 
 Example:
 
-##### Request: http://localhost:3000/resources?select=_id,name,age
+##### Request: http://localhost:3000/resources?select=\_id,name,age
 
 ##### Query:
 
@@ -247,7 +246,7 @@ Example:
 }
 ```
 
-##### Request: http://localhost:3000/resources?select=-_id,-created_at,-updated_at
+##### Request: http://localhost:3000/resources?select=-\_id,-created_at,-updated_at
 
 ##### Query:
 
@@ -329,7 +328,6 @@ can perform a search with filters through the parameters of the internal object.
     "current_job.title": "Budget/Accounting Analyst III"
   }
 }
-
 ```
 
 #### Partial Filters
@@ -338,16 +336,16 @@ Partial filters are a way to search a string type value for a part of the value.
 filters. Making an analogy with javascript, it would be like using the `startsWith`, `endsWith` and `includes` methods,
 where:
 
-* startsWith: search for a string-type value that starts with a given substring. To do this, just add a "*" at the
+- startsWith: search for a string-type value that starts with a given substring. To do this, just add a "\*" at the
   beginning of the substring.
-* endsWith: search for a string-type value that ends with a given substring. To do this, just add a "*" at the end of
+- endsWith: search for a string-type value that ends with a given substring. To do this, just add a "\*" at the end of
   the substring.
-* includes: search for a string value that contains a specific substring. To do this, just add a "*" at the beginning
+- includes: search for a string value that contains a specific substring. To do this, just add a "\*" at the beginning
   and end of the substring.
 
 Example:
 
-##### Request: http://localhost:3000/resources?name=*Lu&email=gmail.com*&job=*Developer*
+##### Request: http://localhost:3000/resources?name=_Lu&email=gmail.com_&job=_Developer_
 
 ##### Query:
 
@@ -380,14 +378,14 @@ comparison operators to check whether an element is in an array.
 According to the [mongodb documentation](https://docs.mongodb.com/manual/reference/operator/query-comparison/), the
 available comparison operators are:
 
-* $eq: Matches values that are equal to a specified value.
-* $gt: Matches values that are greater than a specified value.
-* $gte: Matches values that are greater than or equal to a specified value.
-* $in: Matches any of the values specified in an array.
-* $lt: Matches values that are less than a specified value.
-* $lte: Matches values that are less than or equal to a specified value.
-* $ne: Matches all values that are not equal to a specified value.
-* $nin: Matches none of the values specified in an array.
+- $eq: Matches values that are equal to a specified value.
+- $gt: Matches values that are greater than a specified value.
+- $gte: Matches values that are greater than or equal to a specified value.
+- $in: Matches any of the values specified in an array.
+- $lt: Matches values that are less than a specified value.
+- $lte: Matches values that are less than or equal to a specified value.
+- $ne: Matches all values that are not equal to a specified value.
+- $nin: Matches none of the values specified in an array.
 
 To use these operators, just pass the comparator tag without the "$" symbol. Example:
 
@@ -414,9 +412,9 @@ values of type string or number, or test the operators of `$in` and `$nin` on pa
 Element filters are filters used to deal with parameters that make up the entity's schema. There are two types of
 element filter possibilities:
 
-* $exists: returns elements that have or do not have a specific field
+- $exists: returns elements that have or do not have a specific field
 
-* $type: returns elements whose field has a specific type.
+- $type: returns elements whose field has a specific type.
 
 Example:
 
@@ -479,7 +477,7 @@ Finally, it is possible to use filters with AND | OR operator. The usage logic f
 
 To use the AND operator, you must pass the same value twice in a query. Example:
 
-##### Request: http://localhost:3000/resources?age=gt:30&age=50
+##### Request: http://localhost:3000/resources?age=gt:30&age=lt:50
 
 ##### Query:
 
@@ -493,7 +491,9 @@ To use the AND operator, you must pass the same value twice in a query. Example:
         }
       },
       {
-        "age": 50
+        "age": {
+          "$lt": 50
+        }
       }
     ]
   }
@@ -503,7 +503,7 @@ To use the AND operator, you must pass the same value twice in a query. Example:
 
 To use the OR operator, you must enter the values separated by a comma. Example:
 
-##### Request: http://localhost:3000/resources?age=gt:30,50
+##### Request: http://localhost:3000/resources?age=30,50
 
 ##### Query:
 
@@ -512,9 +512,7 @@ To use the OR operator, you must enter the values separated by a comma. Example:
   "filter": {
     "$or": [
       {
-        "age": {
-          "$gt": 30
-        }
+        "age":  30
       },
       {
         "age": 50
@@ -532,7 +530,7 @@ populated in the object in a single request. For this, the library supports the 
 
 There are three ways to add the `populate` parameter to the query string:
 
-* Specifying only the field to be populated:
+- Specifying only the field to be populated:
 
 ##### Request: http://localhost:3000/resources?populate=jobs
 
@@ -546,7 +544,7 @@ There are three ways to add the `populate` parameter to the query string:
 }
 ```
 
-* Specifying the field to be populated and which fields should be returned:
+- Specifying the field to be populated and which fields should be returned:
 
 ##### Request: http://localhost:3000/resources?populate=jobs;title,salary
 
@@ -562,9 +560,9 @@ There are three ways to add the `populate` parameter to the query string:
     }
   }
 }
-``` 
+```
 
-* Specifying the field to be populated, which fields should be returned and a resource filter (useful parameter when the
+- Specifying the field to be populated, which fields should be returned and a resource filter (useful parameter when the
   populated field is a list):
 
 ##### Request: http://localhost:3000/resources?populate=jobs;title,salary;salary=gt:3000
@@ -586,9 +584,9 @@ There are three ways to add the `populate` parameter to the query string:
     }
   }
 }
-``` 
+```
 
-* Specifying more than one field to be populated:
+- Specifying more than one field to be populated:
 
 ##### Request: http://localhost:3000/resources?populate=jobs&populate=currentJob
 
@@ -605,7 +603,7 @@ There are three ways to add the `populate` parameter to the query string:
     }
   ]
 }
-``` 
+```
 
 There are some rules to consider in populate. The populate must be specified as follows:
 `populate=field;select;filter`. Soon:
@@ -620,13 +618,13 @@ There are some rules to consider in populate. The populate must be specified as 
 
 ## Rules
 
-* For pagination, you should use `limit`, `skip` and `page` only;
-* For ordination, you should use `sort` only;
-* For select, you should use `select` only;
-* For populate, you should use `populate`only;
-* Anything other than `limit`, `skip`, `page`, `sort`, `select` and `populate` will be considered a filter;
-* Parameters never contain characters that don't fit the regex `/[^A-z0-9_.]/g`;
-* Filter values never contain characters that don't fit the regex `/[^\w\s@.-:]/g`;
+- For pagination, you should use `limit`, `skip` and `page` only;
+- For ordination, you should use `sort` only;
+- For select, you should use `select` only;
+- For populate, you should use `populate`only;
+- Anything other than `limit`, `skip`, `page`, `sort`, `select` and `populate` will be considered a filter;
+- Parameters never contain characters that don't fit the regex `/[^A-z0-9_.]/g`;
+- Filter values never contain characters that don't fit the regex `/[^\w\s@.-:]/g`;
 
 ## Observations
 
@@ -641,7 +639,7 @@ in [this project](https://www.github.com/lucasrochagit/nest-query-parser-apis).
 
 ## Upcoming Features:
 
-* Add a query handling option for Typeorm.
+- Add a query handling option for Typeorm.
 
 ## License
 
@@ -655,34 +653,19 @@ Distributed under the Apache License 2.0. See `LICENSE` for more information.
   [![LinkedIn](https://img.shields.io/static/v1?label=linkedin&message=@lucasrochacc&color=0A66C2)](https://www.linkedin.com/in/lucasrochacc/)
   [![Github](https://img.shields.io/static/v1?label=github&message=@lucasrochagit&color=black)](https://github.com/lucasrochagit/)
 
-[//]: # (These are reference links used in the body of this note.)
-
-[node.js]: <https://nodejs.org>
-
-[npm.js]: <https://www.npmjs.com/>
-
+[//]: # 'These are reference links used in the body of this note.'
+[node.js]: https://nodejs.org
+[npm.js]: https://www.npmjs.com/
 [license-image]: https://img.shields.io/badge/license-Apache%202.0-blue.svg
-
 [license-url]: https://github.com/lucasrochagit/nest-query-parser/blob/main/LICENSE
-
 [npm-image]: https://img.shields.io/npm/v/nest-query-parser.svg?color=red&logo=npm
-
 [npm-url]: https://npmjs.org/package/nest-query-parser
-
 [npm-downloads-image]: https://img.shields.io/npm/dm/nest-query-parser.svg
-
 [npm-downloads-url]: https://npmjs.org/package/nest-query-parser
-
 [dependencies-image]: https://shields.io/badge/dependencies-1-green
-
 [dependencies-url]: https://shields.io/badge/dependencies-0-green
-
 [releases-image]: https://img.shields.io/github/release-date/lucasrochagit/nest-query-parser.svg
-
 [releases-url]: https://github.com/lucasrochagit/nest-query-parser/releases
-
 [contributors-image]: https://img.shields.io/github/contributors/lucasrochagit/nest-query-parser.svg?color=green
-
 [contributors-url]: https://github.com/lucasrochagit/nest-query-parser/graphs/contributors
-
 [issues-image]: https://img.shields.io/github/issues/lucasrochagit/nest-query-parser.svg
