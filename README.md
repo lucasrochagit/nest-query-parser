@@ -7,6 +7,9 @@
 [![Contributors][contributors-image]][contributors-url]
 [![NPM Downloads][npm-downloads-image]][npm-downloads-url]
 
+
+**NOTE**: This library will no longer have updates. To use the same existing features, and take advantage of new features and eventual fixes, use the [nest-mongo-query-parser](https://npmjs.com/package/nest-mongo-query-parser) library. For applications that use Typeorm, I'm developing a library called [nest-typeorm-query-parser](https://npmjs.com/package/nest-typeorm-query-parser). Happy Coding! :)
+
 ## Summary
 
 - [Prerequisites](#prerequisites)
